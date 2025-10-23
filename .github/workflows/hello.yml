@@ -1,5 +1,6 @@
 name: Hello CI
-on: [push]
+on:
+  push:
 
 jobs:
   hello:
@@ -8,10 +9,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Hello
-        run: echo "Hello, world!"
+        run: echo Hello, world!
 
       - name: Data UTC
-        shell: bash
         run: |
           echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
 
