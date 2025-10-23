@@ -1,0 +1,17 @@
+name: Night Only
+on:
+  schedule:
+    - cron: '0 * * * *'  # a cada hora (UTC)
+
+jobs:
+  night_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checar noite (SP)
+        env: { TZ: America/Sao_Paulo }
+        run: |
+          h=$(date +%H)
+          case "$h" in 22|23|00|01|02|03|04|05) echo "É noite. Prosseguir.";;
+            *) echo "Fora do período noturno. Encerrando."; exit 78;;
+          esac
+      - run: echo "Tarefa noturna executada."

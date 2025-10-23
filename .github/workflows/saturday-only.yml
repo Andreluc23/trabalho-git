@@ -1,0 +1,20 @@
+name: Saturday Only
+on:
+  schedule:
+    - cron: '0 * * * *'  # a cada hora (UTC)
+
+jobs:
+  saturday_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checar sábado (SP)
+        env: { TZ: America/Sao_Paulo }
+        run: |
+          # %u => 1=Seg ... 6=Sáb 7=Dom
+          d=$(date +%u)
+          if [ "$d" -ne 6 ]; then
+            echo "Não é sábado. Encerrando."
+            exit 78
+          fi
+          echo "É sábado. Prosseguir."
+      - run: echo "Tarefa de sábado executada."

@@ -1,0 +1,113 @@
+name: Push Utilities
+on:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  utils:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      # hello world
+      - name: Hello
+        run: echo "Hello, world!"
+
+      # mostre a data e hora push
+      - name: Datas (UTC e São Paulo)
+        env: { TZ: America/Sao_Paulo }
+        run: |
+          echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
+          echo "São Paulo: $(date '+%Y-%m-%d %H:%M:%S')"
+
+      # usuário do push
+      - name: Usuário do push
+        run: |
+          echo "github.actor: ${{ github.actor }}"
+          echo "autor (últ. commit): ${{ github.event.head_commit.author.name }}"
+
+      # calcular 2+2 variável no terminal
+      - name: Calcular 2+2
+        run: |
+          x=$((2+2))
+          echo "Resultado = $x"
+
+      # listar arquivos
+      - name: Listar arquivos
+        run: ls -la
+
+      # conta arquivos html
+      - name: Contar HTML no repositório
+        run: |
+          count=$(find . -type f -name "*.html" | wc -l)
+          echo "Total .html: $count"
+
+      # criar um arquivo de readme ou texto e preencher
+      - name: Criar README se não existir
+        run: |
+          if [ ! -f README.md ]; then
+            cat > README.md <<'EOF'
+# Meu Trabalho
+- Projeto HTML/CSS/JS
+- Ações do GitHub para utilidades de CI
+EOF
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add README.md
+            git commit -m "chore: cria README automático"
+            git push
+          else
+            echo "README já existe."
+          fi
+
+      # if com arquivos maiores que 100kb alertar (falha o job)
+      - name: Alertar arquivos >100KB
+        id: big
+        run: |
+          list=$(find . -type f -size +100k | sed 's#^\./##' || true)
+          if [ -n "$list" ]; then
+            echo "Arquivos >100KB encontrados:"
+            echo "$list"
+            exit 1
+          else
+            echo "Nenhum arquivo acima de 100KB."
+          fi
+
+      # diffs deste push
+      - name: Arquivos alterados neste push
+        id: diff
+        run: |
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            git diff --name-only "$AFTER~1" "$AFTER" | sed '/^$/d' > changed_files.txt || true
+          else
+            git diff --name-only "$BEFORE" "$AFTER" | sed '/^$/d' > changed_files.txt || true
+          fi
+          echo "Arquivos:"
+          cat changed_files.txt || true
+
+      # action com vários steps - data, usuário, quantos arquivos html css e js foram enviados em sequencia
+      - name: Relatório em sequência (html -> css -> js)
+        run: |
+          if [ ! -s changed_files.txt ]; then
+            echo "Nenhum arquivo alterado."
+            exit 0
+          fi
+          awk '
+            /\.html$/ {if (state==0) state=1}
+            /\.css$/  {if (state==1) state=2}
+            /\.js$/   {if (state==2) state=3}
+            END {print (state==3? "Sequência OK (html->css->js)":"Sem sequência")}
+          ' changed_files.txt
+
+      # mesmo de cima sem sequencia (apenas contagem por tipo)
+      - name: Relatório sem sequência (contagem por tipo)
+        run: |
+          html=$(grep -E '\.html$' changed_files.txt | wc -l || true)
+          css=$(grep -E '\.css$'  changed_files.txt | wc -l || true)
+          js=$(grep -E '\.js$'    changed_files.txt | wc -l || true)
+          echo "Alterados neste push (qualquer ordem) -> HTML:$html CSS:$css JS:$js"

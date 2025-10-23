@@ -1,0 +1,17 @@
+name: Midnight Count (SP)
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 03:00 UTC ≈ 00:00 America/Sao_Paulo
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Contar arquivos por extensão
+        run: |
+          html=$(find . -type f -name '*.html' | wc -l)
+          css=$(find . -type f -name '*.css'  | wc -l)
+          js=$(find . -type f -name '*.js'    | wc -l)
+          total=$(find . -type f | wc -l)
+          echo "00:00 SP -> HTML:$html CSS:$css JS:$js TOTAL:$total"
