@@ -1,10 +1,19 @@
 name: Hello CI
 on: [push]
+
 jobs:
   hello:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo "Hello, world!"
-      - run: echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
-      - run: echo "Autor do push: ${{ github.actor }}"
+
+      - name: Hello
+        run: echo "Hello, world!"
+
+      - name: Data UTC
+        shell: bash
+        run: |
+          echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
+
+      - name: Autor do push
+        run: echo "Autor do push: ${{ github.actor }}"
