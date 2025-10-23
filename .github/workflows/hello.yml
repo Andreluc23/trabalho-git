@@ -1,19 +1,9 @@
-name: Hello CI
+name: hello
 on:
   push:
-
 jobs:
-  hello:
+  j:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - run: echo ok
 
-      - name: Hello
-        run: echo Hello, world!
-
-      - name: Data UTC
-        run: |
-          echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
-
-      - name: Autor do push
-        run: echo "Autor do push: ${{ github.actor }}"
