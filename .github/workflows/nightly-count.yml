@@ -15,3 +15,4 @@ jobs:
           js=$(find . -type f -name '*.js'    | wc -l)
           total=$(find . -type f | wc -l)
           echo "00:00 SP -> HTML:$html CSS:$css JS:$js TOTAL:$total"
+
